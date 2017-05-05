@@ -1,0 +1,47 @@
+{
+    "18": {
+        "addresses": [
+            {
+                "name": "Cser3",
+                "days": [
+                    [
+                        {
+                            "part": "CE",
+                            "alloted": "21"
+                        }
+                    ],
+                    [
+                        {
+                            "part": "CE",
+                            "alloted": "0"
+                        }
+                    ],
+                    [
+                        {
+                            "part": "DE",
+                            "alloted": "0"
+                        }
+                    ],
+                    [
+                        {
+                            "part": "CE",
+                            "alloted": "0"
+                        }
+                    ],
+                    [
+                        {
+                            "part": "DE",
+                            "alloted": "0"
+                        }
+                    ],
+                    [
+                        {
+                            "part": "HE",
+                            "alloted": "0"
+                        }
+                    ]
+                ]
+            }
+        ]
+    }
+}

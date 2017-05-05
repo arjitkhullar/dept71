@@ -1,0 +1,43 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+.ng2-auto-complete {
+  margin-top: 7px;
+}
+
+button:focus {
+  outline: none;
+  border: 0;
+}
+
+* {
+  font-size: 13px;
+}
+
+.custom-head-width {
+  width: 30%;
+  font-weight: bold;
+}
+
+.quantity_input {
+  width: 15px;
+  height: 10px;
+  border: none;
+  font-weight: bold;
+  margin-left: .25rem;
+  margin-bottom: -3px;
+}
+
+.quantity_button {
+  display: grid;
+}
+
+.td_button {
+  border: none !important;
+}
+
+.table td,
+.table th {
+  padding: .1rem !important;
+  vertical-align: middle !important;
+}
