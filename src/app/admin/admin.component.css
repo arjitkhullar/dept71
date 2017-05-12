@@ -1,1 +1,42 @@
+.custom-head-width {
+  width: 18.5rem;
+  font-weight: bold;
+  margin-left: 12px;
+  color: white;
+}
 
+.table td,
+.table th {
+  padding: 0;
+  border: none;
+  vertical-align: middle !important;
+}
+
+.td_button {
+  border: none !important;
+}
+
+.part_input {
+  width: 16.8rem;
+}
+
+.hide_button {
+  visibility: hidden;
+}
+
+.td_button_day {
+  border: none !important;
+  padding-left: 2px !important;
+  ;
+  padding-right: 2px !important;
+  ;
+}
+
+a,
+.dropdown-item {
+  cursor: pointer;
+}
+
+* {
+  font-size: 13px;
+}

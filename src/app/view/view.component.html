@@ -1,3 +1,36 @@
-<p>
-  view works!
-</p>
+<div class="container-fluid">
+
+  <div class="row">
+
+    <div class="col">
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+          <thead style="background-color:black;">
+            <tr>
+              <th class="custom_th">Name</th>
+              <th class="custom_th">Monday</th>
+              <th class="custom_th">Tuesday</th>
+              <th class="custom_th">Wednesday</th>
+              <th class="custom_th">Thursday</th>
+              <th class="custom_th">Friday</th>
+              <th class="custom_th">Saturday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let user of data; let i=index;let odd=odd;" [ngClass]="{'table-active': odd}">
+              <td>
+                <b>{{i}} {{user.name}}</b>
+              </td>
+              <td *ngFor="let days of user.days;">
+                <tr *ngFor="let day of days;">
+                  <b [hidden]="!day.part">{{day.part}}</b>
+                  <b [hidden]="day.part">=></b>
+                </tr>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

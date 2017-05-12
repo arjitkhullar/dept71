@@ -1,204 +1,272 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormGroup, FormArray, FormBuilder } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl, SafeHtml } from '@angular/platform-browser';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ElementRef, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, FormArray, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SocketService } from "../socket.service";
-import { DataExchangeService } from "app/data-exchange.service";
+import { MdButtonModule, MdInputModule } from '@angular/material';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'app-admin',
-    templateUrl: './admin.component.html',
-    styleUrls: ['./admin.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [SocketService, DataExchangeService]
+  selector: 'app-admin',
+  templateUrl: './admin.component.html',
+  styleUrls: ['./admin.component.css'],
+  // changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [SocketService]
 })
 export class AdminComponent implements OnInit, OnDestroy {
-    connection;
-    public myForm: FormGroup;
-    @ViewChild('input')
-    input: ElementRef;
+  connection;
+  partsConnection;
+  usersConnection;
+  messages = [];
+  users;
+  dashboard;
+  copy_dash;
+  public temp_users = {};
+  message: string = '';
+  invalidPart: string = '';
+  invalidUser: string = '';
+  closeResult: string;
+  highlightedWeek: number = 1;
+  weekArray: Object = { '1': true };
+  modelTitle: string = '';
+  // @ViewChild('name') name: ElementRef;
+  // @ViewChild('part') part: ElementRef;
+  public myForm: FormGroup;
+  constructor(private _fb: FormBuilder,
+    private socketService: SocketService, private modalService: NgbModal) { }
+  ngOnDestroy() {
+    this.connection.unsubscribe();
+    this.partsConnection.unsubscribe();
+    this.usersConnection.unsubscribe();
+  }
+  ngOnInit() {
 
-
-
-
-    ngOnDestroy() {
-        // this.connection.unsubscribe();
-    }
-
-    public data = { "addresses": [{ "name": "Cser3", "days": [[{ "part": "CE", "alloted": "22" }], [{ "part": "CE", "alloted": "0" }], [{ "part": "DE", "alloted": "0" }], [{ "part": "CE", "alloted": "0" }], [{ "part": "DE", "alloted": "0" }], [{ "part": "HE", "alloted": "0" }]] }] };
-
-    ngOnInit() {
-        // this.connection = this.socketService.getMessages().subscribe(message => {
-        //     this.messages.push(message);
-        // })
-        this.myForm = this._fb.group({
-            addresses: this._fb.array([
-                this.initAddress(),
-            ])
-        });
-        const control = <FormGroup>this.myForm;
-        setTimeout(() => {
-            control.setValue(this.data, { onlySelf: true });
-
-        }, 1000);
-    }
-    constructor(private _fb: FormBuilder, private _sanitizer: DomSanitizer,
-        private socketService: SocketService, private sheetService: DataExchangeService) {
-
-    }
-
-    createSheet(week: number) {
-        console.log(week);
-        this.sheetService.getSheet(week);
-        // return +num;
-    }
-    UserUpdate(user: string, index: number) {
-        this.users.splice(this.users.indexOf(user), 1);
-        this.temp_users[index] = user;
-    }
-    returnCount(val: number, dir: number): number {
-        let y = +val;
-        return y += dir;
-    }
-
-    initAddress() {
-        return this._fb.group({
-            name: '',
-            days: this._fb.array([
-                this._fb.array([
-                    this.initPart(),
-                ]),
-                this._fb.array([
-                    this.initPart(),
-                ]),
-                this._fb.array([
-                    this.initPart(),
-                ]),
-                this._fb.array([
-                    this.initPart(),
-                ]),
-                this._fb.array([
-                    this.initPart(),
-                ]),
-                this._fb.array([
-                    this.initPart(),
-                ]),
-            ]),
-
-        });
-    }
-    initPart() {
-        return this._fb.group({
-            part: '',
-            alloted: ''
-        });
-    }
-    public users = [
-        'AUser1',
-        'Bser2',
-        'Cser3',
-        'Dser4',
-        'Eser5',
-        'Fser6',
-    ]
-    public temp_users = {};
-    changeCount(part: string, num: number) {
-        for (let i of this.dashboard) {
-            if (i['name'] == part) {
-                i['quantity'] += num;
-            }
+    this.myForm = this._fb.group({
+      addresses: this._fb.array([
+        this.initAddress(),
+      ])
+    });
+    const control = <FormGroup>this.myForm;
+    this.connection = this.socketService.getMessages().subscribe(data => {
+      this.messages.push(data);
+      let addlength = <FormArray>this.myForm.controls['addresses'];
+      let i: number, d: number, p: number;
+      if (addlength.length < data['sheet']['addresses'].length) {
+        while (addlength.length != data['sheet']['addresses'].length) {
+          this.addAddress();
         }
+      } else if (addlength.length > data['sheet']['addresses'].length - 1) {
+        while (data['sheet']['addresses'].length != addlength.length) {
+          const control = <FormArray>this.myForm.controls['addresses'];
+          control.removeAt(data['sheet']['addresses'].length);
+        }
+      }
+      for (i = 0; i < data['sheet']['addresses'].length; i++) {
+        for (d = 0; d < data['sheet']['addresses'][i]['days'].length; d++) {
+          let len = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
+          if (data['sheet']['addresses'][i]['days'][d].length > len.length) {
+            while (data['sheet']['addresses'][i]['days'][d].length != len.length) {
+              this.addPart(i, d);
+            }
+          } else if (data['sheet']['addresses'][i]['days'][d].length < len.length) {
+            while (data['sheet']['addresses'][i]['days'][d].length != len.length) {
+              this.removePart(i, d, len.length - 1);
+            }
+          }
+        }
+
+      }
+      control.setValue(data['sheet'], {
+        onlySelf: true
+      });
+      // let event = new MouseEvent('click', { bubbles: true });
+      // this.name.nativeElement.dispatchEvent(event);
+    })
+    this.partsConnection = this.socketService.getParts().subscribe(data => {
+
+      this.dashboard = data['parts'];
+      this.copy_dash = data['parts'];
+    })
+    this.usersConnection = this.socketService.getUsers().subscribe(data => {
+      this.users = data['users'];
+    })
+    this.socketService.emitSheetquery(0);
+    this.socketService.emitPartsquery();
+    this.socketService.emitUsersquery();
+
+
+  }
+  copySheet(toWeek: number) {
+    let WeekTransfer = { 'from': this.highlightedWeek - 1, 'to': toWeek }
+    this.socketService.transferSheet(WeekTransfer);
+  }
+
+  valueChanged(event: any, i: number, d: number, p: number) {
+    if (event != undefined) {
+      const control = <FormArray>this.myForm.get(`addresses.${i}.days.${d}.${p}.part`);
+      if (typeof (control) === 'object') {
+        control.setValue(control['_value']['name'], { onlySelf: false });
+      }
     }
-    public dashboard = [
-        {
-            name: 'AQ',
-            quantity: 4
-        },
-        {
-            name: 'BE',
-            quantity: 6
-        },
-        {
-            name: 'CE',
-            quantity: 6
-        },
-        {
-            name: 'DE',
-            quantity: 6
-        },
-        {
-            name: 'HE',
-            quantity: 6
-        },
-        {
-            name: 'FE',
-            quantity: 6
-        },
-        {
-            name: 'FF',
-            quantity: 6
-        }]
-    public continents = [{
-        id: 1,
-        name: 'AQ',
-        hours: '4'
-    }, {
+  }
 
-        id: 2,
-        name: 'BE',
-        hours: '1'
-    }, {
-
-        id: 3,
-        name: 'CE',
-        hours: '7'
-    }, {
-
-        id: 4,
-        name: 'DE',
-        hours: '4'
-    }, {
-
-        id: 5,
-        name: 'HE',
-        hours: '3'
-    }, {
-
-        id: 6,
-        name: 'FE',
-        hours: '3'
-    }, {
-
-        id: 7,
-        name: 'FF',
-        hours: '06'
+  toggleHighlight(newValue: number) {
+    if (this.highlightedWeek === newValue) {
+      this.highlightedWeek = -1;
+    } else {
+      this.highlightedWeek = newValue;
     }
-    ];
-    autocompleListFormatter = (data: any): SafeHtml => {
-        let html = `<span>${data.quantity} X ${data.name}</span>`;
-        return this._sanitizer.bypassSecurityTrustHtml(html);
+  }
+  createSheet(week: number) {
+    this.weekArray = {};
+    this.weekArray[(week + 1)] = true;
+    this.socketService.emitSheetquery(week);
+  }
+  UserUpdate(event: any, user: string, i: number) {
+    if (event != undefined) {
+      const control = <FormArray>this.myForm.get(`addresses.${i}.name`);
+      if (typeof (control) === 'object') {
+        control.setValue(control['_value']['name'], { onlySelf: false });
+      }
     }
-    addAddress() {
-        const control = <FormArray>this.myForm.controls['addresses'];
-        control.push(this.initAddress());
-    }
+    // this.users.splice(this.users.indexOf(user), 1);
+    // this.temp_users[index] = user;
+  }
+  initAddress() {
+    return this._fb.group({
+      name: '',
+      days: this._fb.array([
+        this._fb.array([
+          this.initPart(),
+        ]),
+        this._fb.array([
+          this.initPart(),
+        ]),
+        this._fb.array([
+          this.initPart(),
+        ]),
+        this._fb.array([
+          this.initPart(),
+        ]),
+        this._fb.array([
+          this.initPart(),
+        ]),
+        this._fb.array([
+          this.initPart(),
+        ]),
+      ]),
 
-    removeAddress(i: number, user: string) {
-        const control = <FormArray>this.myForm.controls['addresses'];
-        control.removeAt(i);
-        this.users.push(this.temp_users[i]);
+    });
+  }
+  initPart() {
+    return this._fb.group({
+      part: '',
+    });
+  }
 
+  autocompleListFormatter = (data: any) => {
+    return data.name;
+  }
+  addAddress() {
+    const control = <FormArray>this.myForm.controls['addresses'];
+    control.push(this.initAddress());
+  }
+  removeAddress(i: number, user: string) {
+    const control = <FormArray>this.myForm.controls['addresses'];
+    control.removeAt(i);
+    // this.users.push(this.temp_users[i]);
+  }
+  addPart(i: number, d: number) {
+    const control = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
+    control.push(this.initPart());
+  }
+  removePart(i: number, d: number, p: number) {
+    const control = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
+    control.removeAt(p);
+  }
+  save(model: Object, content) {
+    let regxTest = /[@]\d{1}$/;
+    let regxGet = /(.*)@(\d)/;
+    this.message = '';
+    this.invalidPart = '';
+    this.invalidUser = '';
+    let days = { 0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday' }
+    for (let i of model['addresses']) {
+      i['days'].forEach((d, index) => {
+        for (let p of d) {
+          if (regxTest.test(p['part'])) {
+            let match = regxGet.exec(p['part']);
+            this.changeCount(match[1], +match[2]);
+          } else {
+            if (!this.changeCount(p['part'], 1)) {
+              if (p['part'] == "") {
+                this.invalidPart += 'Please add a part for ' + i['name'] + ' on ' + days[index] + '\n';
+              }
+              else {
+                this.invalidPart += 'Please add ' + p['part'] + ' to the parts list\n';
+              }
+            }
+          }
+        }
+      });
+      this.CheckForm(i['name']);
     }
-    addPart(i: number, d: number) {
-        const control = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
-        control.push(this.initPart());
-    }
-    removePart(i: number, d: number, p: number) {
-        const control = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
-        control.removeAt(p);
-    }
-    save(model: Object) {
-        console.log(JSON.stringify(model));
-        this.socketService.saveData(model);
-    }
+    this.CheckForm();
+    this.modalService.open(content).result.then((result) => {
 
+      if (result == 'Yes') {
+        var select: number;
+        Object.keys(this.weekArray).forEach(function (key) {
+          select = +key;
+        });
+        this.socketService.saveData(model, +select - 1);
+      }
+      console.log(result);
+    }, (reason) => {
+      console.log(reason);
+    });
+    this.restoreDash();
+
+  }
+  changeCount(part: string, num: number): boolean {
+    for (let i of this.copy_dash) {
+      if (i['name'].trim() == part.trim()) {
+        i['quantity'] -= num;
+        return true;
+      }
+    }
+    return false;
+  }
+  CheckForm(name?: string) {
+    if (name === undefined) {
+      for (let i of this.copy_dash) {
+        if (+i['quantity'] > 0) {
+          this.message += i['quantity'] + " X " + i['name'] + " left unallotted\n";
+        }
+        if (+i['quantity'] < 0) {
+          this.message += (-1 * +i['quantity']) + " extra " + i['name'] + " allotted\n";
+        }
+      }
+      this.message += this.invalidPart;
+    }
+    else {
+      var isValid: boolean = false;
+      this.users.forEach((user, index) => {
+        if (user['name'] === name) {
+          isValid = true;
+        }
+      });
+      if (!isValid) {
+        this.invalidUser += 'Please add ' + name + ' to the users list\n';
+      }
+      this.message += this.invalidUser;
+    }
+    if (this.message.length > 1) {
+      this.modelTitle = "Still Submit ?"
+    }
+    else {
+      this.modelTitle = "Save Now ?"
+    }
+  }
+  restoreDash() {
+    this.copy_dash = JSON.parse(JSON.stringify(this.dashboard));
+  }
 }

@@ -1,0 +1,13 @@
+a {
+  cursor: pointer;
+}
+
+* {
+  font-size: 14px;
+}
+
+.table td,
+.table th {
+  padding: 0;
+  border: none;
+}

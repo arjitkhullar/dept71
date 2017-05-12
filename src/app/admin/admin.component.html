@@ -1,8 +1,5 @@
 <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">
-  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-    aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+
 
 
   <a class="navbar-brand" href="#/admin">Dept 71</a>
@@ -15,116 +12,111 @@
       <li class="nav-item">
         <a class="nav-link" href="#/user">Users</a>
       </li>
-      <!--<li class="nav-item">
-        <a class="nav-link" href="#/test">Test</a>
-      </li>-->
       <li class="nav-item">
         <a class="nav-link" href="#/view">View</a>
       </li>
-      <li class="nav-item">
-        <a class="btn_week nav-link" style="cursor:pointer;" (click)="createSheet(-1)">Previous Week</a>
+      <li class="nav-item" [ngClass]="{'active': highlightedWeek === 0}">
+        <a class="btn_week nav-link" (click)="createSheet(-1);toggleHighlight(0);">Previous Week</a>
       </li>
-      <li class="nav-item">
-        <a class="btn_week nav-link" style="cursor:pointer;" (click)="createSheet(0)">This Week</a></li>
-      <li class="nav-item">
-        <a class="btn_week nav-link" style="cursor:pointer;" (click)="createSheet(1)">Next Week</a>
+      <li class="nav-item" [ngClass]="{'active': highlightedWeek === 1}">
+        <a class="btn_week nav-link" (click)="createSheet(0);toggleHighlight(1);">This Week</a></li>
+      <li class="nav-item" [ngClass]="{'active': highlightedWeek === 2}">
+        <a class="btn_week nav-link" (click)="createSheet(1);toggleHighlight(2);">Next Week</a>
+      </li>
+      <li class="active" ngbDropdown [hidden]="highlightedWeek === 2">
+        <a class="nav-link" id="dropdownBasic1" ngbDropdownToggle>Copy To</a>
+        <div class="dropdown-menu" aria-labelledby="dropdownBasic1">
+          <button [hidden]="highlightedWeek === 1" class="dropdown-item" md-raised-button (click)="copySheet(0)">Next Week</button>
+          <button class="dropdown-item" md-raised-button (click)="copySheet(1)">Future Week</button>
+        </div>
       </li>
     </ul>
   </div>
 </nav>
-
-<div class="container-fluid">
+<nav class="navbar navbar-inverse bg-inverse" style="position:fixed;width:100%">
+  <div style="text-align:center;">
+    <td style="width:5rem;font-weight:bold;color: white;">Name</td>
+    <td class="custom-head-width">Monday</td>
+    <td class="custom-head-width">Tuesday</td>
+    <td class="custom-head-width">Wednesday</td>
+    <td class="custom-head-width">Thursday</td>
+    <td class="custom-head-width">Friday</td>
+    <td class="custom-head-width">Saturday</td>
+  </div>
+</nav>
+<div class="container-fluid" style="padding-top:3rem">
 
   <div class="row">
-
-    <div class="col-xl-12">
-
+    <div class="col">
       <form [formGroup]="myForm" novalidate>
         <table class="table table-hover">
           <thead>
-
-            <div style="display:inline-flex;width:100%;">
-              <td style="width:14%;font-weight:bold;">Name</td>
-              <td class="custom-head-width">Monday</td>
-              <td class="custom-head-width">Tuesday</td>
-              <td class="custom-head-width">Wednesday</td>
-              <td class="custom-head-width">Thursday</td>
-              <td class="custom-head-width">Friday</td>
-              <td class="custom-head-width">Saturday</td>
-            </div>
-
           </thead>
-          <tbody>
-            <div formArrayName="addresses">
-              <tr *ngFor="let address of myForm.controls.addresses.controls; let i=index" [formGroupName]="i">
-                <td class="td_button">
-
-                  <a style="cursor:pointer;" *ngIf="myForm.controls.addresses.controls.length > 1" (click)="removeAddress(i,name.value);">
-                    <i class="fa fa-times" aria-hidden="true"></i></a>
-                </td>
-                <td>
-                  <md-input-container style="width: 7rem;">
-                    <input #name mdInput placeholder="Name" type="text" (valueChanged)="UserUpdate(name.value,i);" ng2-auto-complete [source]="users"
-                      formControlName="name" required>
-                  </md-input-container>
-                </td>
-                <td class="td_button">
-                  <a style="cursor:pointer;" *ngIf="i == myForm.controls.addresses.controls.length-1" (click)="addAddress();">
-                    <i class="fa fa-plus" aria-hidden="true"></i></a>
-
-                </td>
-                <div formArrayName="days">
-                  <td *ngFor="let day of address.controls.days.controls; let d=index">
-                    <div formArrayName="{{d}}">
-                      <div *ngFor="let part of day.controls; let p=index" [formGroupName]="p">
-                        <tr>
-                          <td class="td_button">
-                            <a style="cursor:pointer;" *ngIf="day.controls.length > 1" (click)="removePart(i,d,p);">
-                              <i class="fa fa-times" aria-hidden="true"></i>
-                            </a>
-                          </td>
-                          <td class="quantity_button">
-                            <a style="cursor:pointer;" (click)="changeCount(user.value,-1);vl.value=returnCount(vl.value,1)">
-                              <i class="fa fa-chevron-up" aria-hidden="true"></i>
-                            </a>
-                            <input #vl type="text" style="cursor:default;background:transparent;" (click)="vl.value=vl.value" [(ngModel)]="vl.value"
-                              formControlName="alloted" class="quantity_input">
-                            <a style="cursor:pointer;" (click)="changeCount(user.value,1);vl.value=returnCount(vl.value,-1)">
-                              <i class="fa fa-chevron-down" aria-hidden="true"></i>
-                            </a>
-                          </td>
-                          <td>
-                            <!--</div>-->
-                            <md-input-container style="width: 20rem;">
-                              <input mdInput placeholder="Part" #user ng2-auto-complete [source]="dashboard" display-property-name="name" value-property-name="name"
-                                [list-formatter]="autocompleListFormatter" formControlName="part">
-                            </md-input-container>
-                          </td>
-                          <td class="td_button">
-                            <a style="cursor:pointer;" *ngIf="p == day.controls.length-1" (click)="addPart(i,d);">
-                              <i class="fa fa-plus" aria-hidden="true"></i>
-                            </a>
-                          </td>
-                        </tr>
-                      </div>
+          <tbody formArrayName="addresses">
+            <tr *ngFor="let address of myForm['controls']['addresses']['controls']; let i=index" [formGroupName]="i">
+              <td class="td_button" [ngClass]="{'hide_button':myForm['controls']['addresses']['controls'].length < 1}">
+                <a (click)="removeAddress(i,name.value);">
+                  <i class="fa fa-times" aria-hidden="false"></i></a>
+              </td>
+              <td>
+                <md-input-container style="width: 5rem;">
+                  <input #name type="name" mdInput ngui-auto-complete placeholder="Name" type="text" [list-formatter]="autocompleListFormatter"
+                    (valueChanged)="UserUpdate($event,name.value,i);" auto-complete [source]="users" match-formatted="true"
+                    value-property-name="name" display-property-name="name" formControlName="name">
+                </md-input-container>
+              </td>
+              <td class="td_button" [ngClass]="{'hide_button':i != myForm['controls']['addresses']['controls'].length-1}">
+                <a (click)="addAddress();">
+                  <i class="fa fa-plus" aria-hidden="false"></i></a>
+              </td>
+              <div formArrayName="days">
+                <td *ngFor="let day of address['controls']['days']['controls']; let d=index">
+                  <div formArrayName="{{d}}">
+                    <div *ngFor="let part of day['controls']; let p=index" [formGroupName]="p">
+                      <tr>
+                        <td class="td_button_day" [ngClass]="{'hide_button':day['controls'].length <= 1}">
+                          <a (click)="removePart(i,d,p);">
+                            <i class="fa fa-times" aria-hidden="false"></i>
+                          </a>
+                        </td>
+                        <td>
+                          <md-input-container class="part_input">
+                            <input type="text" mdInput placeholder="Part" #part ngui-auto-complete [source]="dashboard" [list-formatter]="autocompleListFormatter"
+                              formControlName="part" value-property-name="name" display-property-name="name" match-formatted="true"
+                              no-match-found-text=" " (valueChanged)="valueChanged($event,i,d,p);">
+                          </md-input-container>
+                        </td>
+                        <td class="td_button_day" [ngClass]="{'hide_button':p != day['controls'].length-1}">
+                          <a (click)="addPart(i,d);">
+                            <i class="fa fa-plus" aria-hidden="false"></i>
+                          </a>
+                        </td>
+                      </tr>
                     </div>
-                  </td>
-                </div>
-
-
-
-              </tr>
-            </div>
+                  </div>
+                </td>
+              </div>
+            </tr>
           </tbody>
         </table>
       </form>
     </div>
-
   </div>
 </div>
 
-<button md-raised-button (click)="save(myForm.value)">Save</button>
-
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">{{modelTitle}}</h4>
+  </div>
+  <div class="modal-body">
+    <pre *ngFor="let s of message.split('\n')">{{s}}</pre>
+  </div>
+  <div class="modal-footer">
+    <button md-raised-button class="btn btn-secondary" (click)="c('No')">No</button>
+    <button md-raised-button class="btn btn-secondary" (click)="c('Yes')">Yes</button>
+  </div>
+</ng-template>
+<button md-raised-button (click)="save(myForm.value,content)">Save</button>
 <!--<div class="col-lg-12">
   <div>myForm details:-</div>
   <pre>form value: <br>{{myForm.value | json}}</pre>

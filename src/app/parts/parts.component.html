@@ -1,3 +1,71 @@
-<p>
-  parts works!
-</p>
+<nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">
+  <a class="navbar-brand" href="#/admin">Back</a>
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <ul class="navbar-nav navbar-right mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="#/user">Users</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#/view">View</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-12">
+      <form [formGroup]="myForm" novalidate>
+        <table class="table table-hover">
+          <thead>
+            <th>Part Name</th>
+            <th>Quantity</th>
+            <th>Hours</th>
+          </thead>
+          <tbody formArrayName="parts">
+            <tr *ngFor="let part of myForm['controls']['parts']['controls']; let i=index" [formGroupName]="i">
+              <td>
+                <a [hidden]="myForm['controls']['parts']['controls'].length <= 1" (click)="removePart(i);">
+                  <i class="fa fa-times" aria-hidden="true"></i>
+                </a>
+                <md-input-container style="width: 50rem;">
+                  <input type="text" mdInput placeholder="Part name" formControlName="name" required>
+                </md-input-container>
+                <a [hidden]="i != myForm['controls']['parts']['controls'].length-1" (click)="addPart();">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                </a>
+              </td>
+              <td>
+                <md-input-container style="width: 20rem;">
+                  <input type="text" maxlength="1" pattern="[0-9]" mdInput placeholder="Quantity" formControlName="quantity">
+                </md-input-container>
+              </td>
+              <td>
+                <md-input-container style="width: 20rem;">
+                  <input type="text" maxlength="2" pattern="\d+" mdInput placeholder="Hours" formControlName="hours">
+                </md-input-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>
+
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title"></h4>
+  </div>
+  <div class="modal-body" style="text-align:center">
+    Parts Updated
+  </div>
+  <div class="modal-footer">
+    <button md-raised-button class="btn btn-secondary" (click)="c('Ok')">Ok</button>
+  </div>
+</ng-template>
+<button md-raised-button (click)="save(myForm.value,content)">Save</button>
+<!--<div class="col-lg-12">
+  <div>myForm details:-</div>
+  <pre>form value: <br>{{myForm.value | json}}</pre>
+</div>-->

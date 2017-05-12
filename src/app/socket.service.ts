@@ -7,22 +7,20 @@ import * as io from 'socket.io-client';
 export class SocketService {
 
   constructor() { }
-  private url = 'http://localhost:3003';
+  private url = 'http://10.27.10.177:3003';
   private socket;
 
-  saveData(data: object) {
+  saveData(data: object, week: number) {
 
-    this.socket.emit('saveData', data);
+    this.socket.emit('saveData', { 'data': data, 'week': week });
   }
-  getSheet(week: number) {
-    this.socket = io(this.url);
+  emitSheetquery(week: number) {
     this.socket.emit('getSheet', week);
   }
-
   getMessages() {
     let observable = new Observable(observer => {
       this.socket = io(this.url);
-      this.socket.on('message', (data) => {
+      this.socket.on('loadSheet', (data) => {
         observer.next(data);
       });
       return () => {
@@ -31,5 +29,58 @@ export class SocketService {
     })
     return observable;
   }
-
+  transferSheet(pram: Object) {
+    this.socket.emit('transferSheet', pram);
+  }
+  emitPartsquery() {
+    this.socket.emit('getParts', 'sendParts');
+  }
+  saveParts(data: object) {
+    this.socket.emit('saveParts', data);
+  }
+  getParts() {
+    let observable = new Observable(observer => {
+      this.socket = io(this.url);
+      this.socket.on('loadParts', (data) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+    return observable;
+  }
+  emitUsersquery() {
+    this.socket.emit('getUsers', 'sendUsers');
+  }
+  saveUsers(data: object) {
+    this.socket.emit('saveUsers', data);
+  }
+  getUsers() {
+    let observable = new Observable(observer => {
+      this.socket = io(this.url);
+      this.socket.on('loadUsers', (data) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+    return observable;
+  }
+  emitViewQuery(week: number) {
+    this.socket.emit('getView', week);
+  }
+  getView() {
+    let observable = new Observable(observer => {
+      this.socket = io(this.url);
+      this.socket.on('ShowView', (data) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+    return observable;
+  }
 }
