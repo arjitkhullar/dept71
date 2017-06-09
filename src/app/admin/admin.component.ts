@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ElementRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, FormArray, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { SocketService } from "../socket.service";
+import { SocketService } from '../socket.service';
 import { MdButtonModule, MdInputModule } from '@angular/material';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -20,13 +20,13 @@ export class AdminComponent implements OnInit, OnDestroy {
   dashboard;
   copy_dash;
   public temp_users = {};
-  message: string = '';
-  invalidPart: string = '';
-  invalidUser: string = '';
+  message = '';
+  invalidPart = '';
+  invalidUser = '';
   closeResult: string;
-  highlightedWeek: number = 1;
+  highlightedWeek = 1;
   weekArray: Object = { '1': true };
-  modelTitle: string = '';
+  modelTitle = '';
   // @ViewChild('name') name: ElementRef;
   // @ViewChild('part') part: ElementRef;
   public myForm: FormGroup;
@@ -47,27 +47,27 @@ export class AdminComponent implements OnInit, OnDestroy {
     const control = <FormGroup>this.myForm;
     this.connection = this.socketService.getMessages().subscribe(data => {
       this.messages.push(data);
-      let addlength = <FormArray>this.myForm.controls['addresses'];
+      const addlength = <FormArray>this.myForm.controls['addresses'];
       let i: number, d: number, p: number;
       if (addlength.length < data['sheet']['addresses'].length) {
-        while (addlength.length != data['sheet']['addresses'].length) {
+        while (addlength.length !== data['sheet']['addresses'].length) {
           this.addAddress();
         }
       } else if (addlength.length > data['sheet']['addresses'].length - 1) {
-        while (data['sheet']['addresses'].length != addlength.length) {
+        while (data['sheet']['addresses'].length !== addlength.length) {
           const control = <FormArray>this.myForm.controls['addresses'];
           control.removeAt(data['sheet']['addresses'].length);
         }
       }
       for (i = 0; i < data['sheet']['addresses'].length; i++) {
         for (d = 0; d < data['sheet']['addresses'][i]['days'].length; d++) {
-          let len = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
+          const len = <FormArray>this.myForm.get(`addresses.${i}.days.${d}`);
           if (data['sheet']['addresses'][i]['days'][d].length > len.length) {
-            while (data['sheet']['addresses'][i]['days'][d].length != len.length) {
+            while (data['sheet']['addresses'][i]['days'][d].length !== len.length) {
               this.addPart(i, d);
             }
           } else if (data['sheet']['addresses'][i]['days'][d].length < len.length) {
-            while (data['sheet']['addresses'][i]['days'][d].length != len.length) {
+            while (data['sheet']['addresses'][i]['days'][d].length !== len.length) {
               this.removePart(i, d, len.length - 1);
             }
           }
@@ -79,15 +79,15 @@ export class AdminComponent implements OnInit, OnDestroy {
       });
       // let event = new MouseEvent('click', { bubbles: true });
       // this.name.nativeElement.dispatchEvent(event);
-    })
+    });
     this.partsConnection = this.socketService.getParts().subscribe(data => {
 
       this.dashboard = data['parts'];
       this.copy_dash = data['parts'];
-    })
+    });
     this.usersConnection = this.socketService.getUsers().subscribe(data => {
       this.users = data['users'];
-    })
+    });
     this.socketService.emitSheetquery(0);
     this.socketService.emitPartsquery();
     this.socketService.emitUsersquery();
@@ -95,12 +95,12 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   }
   copySheet(toWeek: number) {
-    let WeekTransfer = { 'from': this.highlightedWeek - 1, 'to': toWeek }
+    const WeekTransfer = { 'from': this.highlightedWeek - 1, 'to': toWeek };
     this.socketService.transferSheet(WeekTransfer);
   }
 
   valueChanged(event: any, i: number, d: number, p: number) {
-    if (event != undefined) {
+    if (event !== undefined) {
       const control = <FormArray>this.myForm.get(`addresses.${i}.days.${d}.${p}.part`);
       if (typeof (control) === 'object') {
         control.setValue(control['_value']['name'], { onlySelf: false });
@@ -121,7 +121,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.socketService.emitSheetquery(week);
   }
   UserUpdate(event: any, user: string, i: number) {
-    if (event != undefined) {
+    if (event !== undefined) {
       const control = <FormArray>this.myForm.get(`addresses.${i}.name`);
       if (typeof (control) === 'object') {
         control.setValue(control['_value']['name'], { onlySelf: false });
@@ -183,25 +183,24 @@ export class AdminComponent implements OnInit, OnDestroy {
     control.removeAt(p);
   }
   save(model: Object, content) {
-    let regxTest = /[@]\d{1}$/;
-    let regxGet = /(.*)@(\d)/;
+    const regxTest = /[@]\d{1}$/;
+    const regxGet = /(.*)@(\d)/;
     this.message = '';
     this.invalidPart = '';
     this.invalidUser = '';
-    let days = { 0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday' }
-    for (let i of model['addresses']) {
+    const days = { 0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday' };
+    for (const i of model['addresses']) {
       i['days'].forEach((d, index) => {
-        for (let p of d) {
+        for (const p of d) {
           if (regxTest.test(p['part'])) {
-            let match = regxGet.exec(p['part']);
+            const match = regxGet.exec(p['part']);
             this.changeCount(match[1], +match[2]);
           } else {
             if (!this.changeCount(p['part'], 1)) {
-              if (p['part'] == "") {
-                this.invalidPart += 'Please add a part for ' + i['name'] + ' on ' + days[index] + '\n';
-              }
-              else {
-                this.invalidPart += 'Please add ' + p['part'] + ' to the parts list\n';
+              if (p['part'] === '') {
+                this.invalidPart += `Please add a part for ${i['name']} on ${days[index]} \n`;
+              } else {
+                this.invalidPart += `Please add ${p['part']} to the parts list\n`;
               }
             }
           }
@@ -212,8 +211,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.CheckForm();
     this.modalService.open(content).result.then((result) => {
 
-      if (result == 'Yes') {
-        var select: number;
+      if (result === 'Yes') {
+        let select: number;
         Object.keys(this.weekArray).forEach(function (key) {
           select = +key;
         });
@@ -227,8 +226,8 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   }
   changeCount(part: string, num: number): boolean {
-    for (let i of this.copy_dash) {
-      if (i['name'].trim() == part.trim()) {
+    for (const i of this.copy_dash) {
+      if (i['name'].trim() === part.trim()) {
         i['quantity'] -= num;
         return true;
       }
@@ -237,36 +236,35 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
   CheckForm(name?: string) {
     if (name === undefined) {
-      for (let i of this.copy_dash) {
+      for (const i of this.copy_dash) {
         if (+i['quantity'] > 0) {
-          this.message += i['quantity'] + " X " + i['name'] + " left unallotted\n";
+          this.message += `${i['quantity']} X ${i['name']} left unallotted\n`;
         }
         if (+i['quantity'] < 0) {
-          this.message += (-1 * +i['quantity']) + " extra " + i['name'] + " allotted\n";
+          this.message += `${(-1 * +i['quantity'])} extra ${i['name']} allotted\n`;
         }
       }
       this.message += this.invalidPart;
-    }
-    else {
-      var isValid: boolean = false;
+    } else {
+      let isValid = false;
       this.users.forEach((user, index) => {
         if (user['name'] === name) {
           isValid = true;
         }
       });
       if (!isValid) {
-        this.invalidUser += 'Please add ' + name + ' to the users list\n';
+        this.invalidUser += `Please add ${name} to the users list\n`;
       }
       this.message += this.invalidUser;
     }
     if (this.message.length > 1) {
-      this.modelTitle = "Still Submit ?"
-    }
-    else {
-      this.modelTitle = "Save Now ?"
+      this.modelTitle = 'Still Submit ?';
+    } else {
+      this.modelTitle = 'Save Now ?';
     }
   }
   restoreDash() {
     this.copy_dash = JSON.parse(JSON.stringify(this.dashboard));
   }
 }
+;

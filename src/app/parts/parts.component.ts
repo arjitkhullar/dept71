@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, FormArray, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SocketService } from "../socket.service";
+import { SocketService } from '../socket.service';
 import { MdButtonModule, MdInputModule } from '@angular/material';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 

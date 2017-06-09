@@ -39,11 +39,11 @@
     "@types/core-js": "^0.9.41",
     "@types/hammerjs": "^2.0.34",
     "@types/jasmine": "2.5.38",
-    "@types/node": "~6.0.60",
+    "@types/node": "^6.0.60",
     "@types/socket.io-client": "^1.4.29",
-    "codelyzer": "~2.0.0",
-    "ts-node": "~2.0.0",
-    "tslint": "~4.5.0",
-    "typescript": "~2.2.0"
+    "codelyzer": "^2.0.0",
+    "ts-node": "^2.0.0",
+    "tslint": "^4.5.0",
+    "typescript": "^2.2.0"
   }
 }

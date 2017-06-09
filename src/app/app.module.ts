@@ -15,7 +15,7 @@ import { MaterialModule } from '@angular/material';
 import { NguiAutoCompleteModule } from '@ngui/auto-complete';
 import 'hammerjs';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { SocketService } from "./socket.service";
+import { SocketService } from './socket.service';
 
 
 

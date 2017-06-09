@@ -6,9 +6,9 @@ import * as io from 'socket.io-client';
 @Injectable()
 export class SocketService {
 
-  constructor() { }
-  private url = 'http://10.27.10.177:3003';
+  private url = 'http://localhost:3003';
   private socket;
+  constructor() { }
 
   saveData(data: object, week: number) {
 
